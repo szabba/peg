@@ -1,0 +1,74 @@
+# `(peg)`
+
+`(peg)` is a small R7RS Scheme library for parsing text according to
+Parsing Expression Grammars ([PEG][]s for short). It's split up into
+small, cohesive modules that deal, separately, with specifying grammars,
+providing input and parsing.
+
+## Example
+
+The following program tries to match parentheses in a few input strings.
+This is a common example of a grammar that cannot be matched using
+regular expressions.
+
+```scheme
+(import (scheme base)
+        (scheme write)
+        (peg grammar)
+        (peg parse)
+        (peg input string))
+
+
+;; Grammar for matching empty parentheses.
+(define-grammar (matching-parens parens)
+  (parens (group (lit-char #\() (optional parens) (lit-char #\)))))
+
+;; Try matching on the grammar and report how it went
+(define (show-case input-string)
+
+  (define (present status)
+    (display "Input: ")
+    (write input-string)
+    (display status)
+    (newline))
+
+  (let* ((input (string->input input-string))
+         (result (parse matching-parens input)))
+
+    (cond ((parse-fail? result) (present " does not match"))
+
+          (else (present " matches")))))
+
+;; Try all the cases out
+(for-each show-case
+          (list "" "()" "()(" ")()" "(())"))
+```
+
+The program outputs:
+
+```
+Input: "" does not match
+Input: "()" matches
+Input: "()(" matches
+Input: ")()" does not match
+Input: "(())" matches
+```
+
+Note, that the parsers is perfectly happy with matching only a prefix of
+the input (ie, not consuming all of it), as is the case with `"()("`.
+
+## Plans
+
+Implementing a [packrat] parser, which supports PEG grammars in linear
+time might be worthwhile.
+
+Generating random strings that will match a given grammar might be a fun
+if not very useful endeavour.
+
+## License
+
+The library is licensed under the Mozilla Public License 2.0 (for more
+details read the LICENSE file).
+
+[PEG]: http://pdos.csail.mit.edu/~baford/packrat/popl04/ "Ford's paper introducing PEGs"
+[packrat]: http://bford.info/pub/lang/packrat-icfp02/ "Ford's paper on packrat parsers"
