@@ -7,6 +7,7 @@
   (export port->input)
 
   (import (scheme base)
+	  (scheme case-lambda)
           (peg input))
 
   (include "port.scm"))
